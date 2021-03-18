@@ -4,30 +4,33 @@ const { handleMailer } = require("../../Handler/handleMailer.js");
 const conn = require("../../Connection/ConnectDB.js");
 const { signJwt } = require("../../Config/jwt.js");
 
-module.exports = {
+class authModel {
     loginModel(userModel, cb) {
         conn.then((db) => {
             const userDB = db.collection("user");
             userDB.findOne({ email: userModel.email }, async (err, res) => {
                 if (!res) {
-                    return cb("Email not Found");
+                    return cb(null, "Email not Found");
                 } else {
                     bcrypt.compare(
                         userModel.password,
                         res.password,
                         (err, isMatch) => {
                             if (!isMatch) {
-                                return cb("Password incorrect!");
+                                return cb(null, "Password incorrect!");
                             } else {
-                                const token = signJwt(res);
-                                return cb(token);
+                                if (!res.state.locked) {
+                                    const token = signJwt(res);
+                                    return cb(token);
+                                }
+                                return cb(null, "Account was locked!");
                             }
                         }
                     );
                 }
             });
         });
-    },
+    }
     registerModel(user, cb) {
         conn.then((db) => {
             const userDB = db.collection("user");
@@ -41,7 +44,7 @@ module.exports = {
                 }
             });
         });
-    },
+    }
     modifyUserModel(userSchema, cb) {
         conn.then((db) => {
             const userDB = db.collection("user");
@@ -58,7 +61,7 @@ module.exports = {
                 }
             });
         });
-    },
+    }
     updatePasswordModel(userModel, cb) {
         console.log(userModel);
         conn.then(async (db) => {
@@ -75,5 +78,8 @@ module.exports = {
                 }
             );
         });
-    },
+    }
 };
+
+
+module.exports = new authModel();

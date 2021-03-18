@@ -6,13 +6,13 @@ const { handleMailer } = require("../../Handler/handleMailer.js");
 
 
 let globalEmail = "";
-module.exports = {
+class Auth {
     login(req, res) {
         authModel.loginModel(req.body, (err, result) => {
             if (err) res.json(err);
             res.json(result);
         });
-    },
+    }
     async register(req, res) {
         const passwordHash = await bcrypt.hash(req.body.password, salt);
         const user = {
@@ -24,7 +24,7 @@ module.exports = {
             if (err) res.json(err);
             res.json(result);
         });
-    },
+    }
     confirmEmail(req, res) {
         if (req.user.password) {
             userSchema.email = req.user.email;
@@ -40,14 +40,14 @@ module.exports = {
             globalEmail = req.user;
             return res.status(200).json("Redirect to other page");
         }
-    },
+    }
     forgotPassword(req, res) {
         const email = req.body.email;
         handleMailer(email, true, (err, result) => {
             if (result) return res.status(200).json("Check your email!");
             return res.json(err);
         });
-    },
+    }
     updatePassword(req, res) {
         let user = {};
         if (req.user) {
@@ -66,5 +66,8 @@ module.exports = {
             if (err) return res.status(403).json(err);
             else return res.status(200).json(result);
         });
-    },
+    }
 };
+
+
+module.exports = new Auth()

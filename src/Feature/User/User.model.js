@@ -3,7 +3,7 @@ const { ObjectID } = require("mongodb");
 
 const conn = require("../../Connection/ConnectDB.js");
 
-module.exports = {
+class userModel {
 	getProfileModel(userId, cb) {
 		conn.then((db) => {
 			const userDB = db.collection("user");
@@ -12,7 +12,7 @@ module.exports = {
 				else return cb(null, result);
 			});
 		});
-	},
+	}
 	updateProfileModel(userSchema, email, cb) {
 		conn.then((db) => {
 			console.log(userSchema);
@@ -38,7 +38,7 @@ module.exports = {
 				}
 			);
 		});
-	},
+	}
 	updateAvatarModel(data, cb) {
 		conn.then((db) => {
 			const userDB = db.collection("user");
@@ -51,7 +51,7 @@ module.exports = {
 				}
 			);
 		});
-	},
+	}
 	updateBackgroundModel(data, cb) {
 		conn.then((db) => {
 			const userDB = db.collection("user");
@@ -64,7 +64,7 @@ module.exports = {
 				}
 			);
 		});
-	},
+	}
 	followUserModel(data, cb) {
 		conn.then((db) => {
 			const userDB = db.collection("user");
@@ -114,7 +114,7 @@ module.exports = {
 				}
 			);
 		});
-	},
+	}
 	listFollowingModel(userId, cb) {
 		conn.then((db) => {
 			const userDB = db.collection("user");
@@ -143,5 +143,8 @@ module.exports = {
 				.then((result) => cb(null,result))
 				.catch((err) => cb(err));
 		});
-	},
+	}
 };
+
+
+module.exports = new userModel()
