@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const salt = 10; 
 const authModel = require("./Auth.model.js");
-const userSchema = require("../../Models/Users.js");
+const userSchema = require("../../Schema/Users.js");
 const { handleMailer } = require("../../Handler/handleMailer.js");
 
 

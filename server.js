@@ -20,14 +20,18 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-const Auth = require("./src/Feature/Auth/Auth.router.js");
+const Auth = require("./src/Feature/Auth/Auth.route.js");
 const User = require("./src/Feature/User/User.route.js");
 const Group = require("./src/Feature/Group/Group.route.js");
 const Post = require("./src/Feature/Post/Post.route.js");
+const Message = require("./src/Feature/Message/Message.route.js");
+const MessageRoom = require("./src/Feature/MessageRoom/MessageRoom.route.js");
 
 app.use("/auth", Auth);
 app.use("/user", User);
 app.use("/group", Group);
 app.use("/post", Post);
+app.use("/message", Message);
+app.use("/room", MessageRoom);
 
 app.listen(process.env.PORT || 1234);

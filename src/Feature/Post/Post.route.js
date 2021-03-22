@@ -8,5 +8,6 @@ const postController = require("./Post.controller");
 router.post("/create", verifyJwt, postController.createPost);
 router.put("/update", verifyJwt, postController.updatePost);
 router.delete("/delete", verifyJwt, postController.deletePost);
+router.get("/", verifyJwt, postController.getUsersPost);
 
 module.exports = router;

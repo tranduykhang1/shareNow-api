@@ -4,12 +4,16 @@ const conn = require("../../Connection/ConnectDB");
 
 class groupModel {
 	createGroupModel(data, cb) {
-		conn.then(db => {
+		conn.then((db) => {
 			const groupDb = db.collection("group");
-			groupDb.insertOne(data, { forceServerObjectId: true  }, (err, result) => {
-				if (err) return cb(err);
-				return cb(null, "New group was created!");
-			});
+			groupDb.insertOne(
+				data,
+				{ forceServerObjectId: true },
+				(err, result) => {
+					if (err) return cb(err);
+					return cb(null, "New group was created!");
+				}
+			);
 		});
 	}
 	deleteGroupModel(groupId, cb) {
@@ -71,16 +75,28 @@ class groupModel {
 		});
 	}
 	searchGroupModel(q, cb) {
-		console.log(q);
 		conn.then((db) => {
 			const groupDB = db.collection("group");
 			groupDB
-				.find({search_name: {$regex: q}})
+				.find({ search_name: { $regex: q } })
 				.toArray()
 				.then((result) => cb(null, result))
 				.catch((err) => cb(new Error(err)));
 		});
 	}
-};
+	createNewPostModel(group, data, cb) {
+		conn.then((db) => {
+			const groupDB = db.collection("group");
+			groupDB.updateOne(
+				{ _id: ObjectID(group) },
+				{ $push: { post: data } },
+				(err, result) => {
+					if (err) return cb(err);
+					return cb(null, "New post was created!");
+				}
+			);
+		});
+	}
+}
 
 module.exports = new groupModel();

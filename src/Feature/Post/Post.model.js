@@ -17,11 +17,11 @@ class postModel {
 		conn.then((db) => {
 			const postDB = db.collection("post");
 			postDB.updateOne(
-				{ _id: ObjectID(data.id) },
+				{ "list.id": data.id },
 				{
 					$set: {
-						body: data.body,
-						tag: data.tag,
+						"list.$.body": data.body,
+						"list.$.tag": data.tag,
 					},
 				},
 				(err, result) => {
@@ -33,12 +33,47 @@ class postModel {
 			);
 		});
 	}
-	deletePostModel(id, cb) {
+	deletePostModel(postId, cb) {
 		conn.then((db) => {
 			const postDB = db.collection("post");
-			postDB.deleteOne({ _id: ObjectID(id) }, (err, result) => {
-				if (err) return cb("Delete fail!");
-				return cb(null, "Post was deleted!");
+			postDB.updateOne(
+				{ "list.id": postId },
+				{ $pull: { list: { id: postId } } },
+				(err, result) => {
+					if (err) return cb(err);
+					return cb(null, "Post was deleted!");
+				}
+			);
+		});
+	}
+	userIsExist(userId, cb) {
+		conn.then((db) => {
+			const postDB = db.collection("post");
+			postDB.findOne({ user: userId }, (err, result) => {
+				if (err) return cb("Have a error!!");
+				return cb(null, result);
+			});
+		});
+	}
+	insertNewPost(userId, data, cb) {
+		conn.then((db) => {
+			const postDB = db.collection("post");
+			postDB.updateOne(
+				{ user: userId },
+				{ $push: { list: data } },
+				(err, result) => {
+					if (err) return cb("Update user error!");
+					return cb(null, "Inserted new post!");
+				}
+			);
+		});
+	}
+	postOfUser(userId, cb) {
+		conn.then((db) => {
+			const postDB = db.collection("post");
+			postDB.findOne({ user: userId }, (err, result) => {
+				if (err) return cb(err);
+				return cb(null, result);
 			});
 		});
 	}

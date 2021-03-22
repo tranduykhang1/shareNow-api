@@ -1,5 +1,9 @@
 const postSchema = {
 	user: "",
+	list: [],
+};
+const listPost = {
+	id: "",
 	photos: [],
 	create_at: "",
 	body: "",
@@ -8,5 +12,4 @@ const postSchema = {
 	emoji: [],
 	state: { locked: false },
 };
-
-module.exports = postSchema;
+module.exports = { postSchema, listPost, };

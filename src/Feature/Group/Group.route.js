@@ -11,6 +11,7 @@ router.post("/add-member", verifyJwt, groupController.addMember)
 router.delete("/remove-member", verifyJwt, groupController.removeMember)
 router.get("/users-group", verifyJwt, groupController.allGroupByUser)
 router.get("/search", verifyJwt, groupController.searchGroup)
+router.post("/create-post", verifyJwt, groupController.createPost)
 
 
 module.exports = router
