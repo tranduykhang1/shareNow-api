@@ -45,7 +45,35 @@ class messageRoom {
 	}
 	getRoomMembers(req, res) {
 		const { room } = req.query;
-		messageRoomModel.getRoomMembersModel(room, (err,result) =>{
+		messageRoomModel.getRoomMembersModel(room, (err, result) => {
+			return res.status(200).json(result);
+		});
+	}
+	joinRoom(req, res) {
+		const data = {
+			room: req.query.room,
+			user: req.user._id,
+		};
+
+		messageRoomModel.joinRoomModel(data, (err, result) => {
+			if (err) return res.status(403).json(err);
+			return res.status(200).json(result);
+		});
+	}
+	leaveRoom(req, res) {
+		const data = {
+			room: req.query.room,
+			user: req.user._id,
+		};
+		messageRoomModel.leaveRoomModel(data, (err,result) =>{
+			if(err) return res.status(403).json(err)
+			return res.status(200).json(result)
+		})
+	}
+	destroyRoom(req, res) {
+		const { room } = req.query;
+		messageRoomModel.destroyRoomModel(room, (err,result) =>{
+			if(err) return res.status(403).json(err)
 			return res.status(200).json(result)
 		})
 	}

@@ -1,15 +1,15 @@
 const postSchema = {
-	user: "",
-	list: [],
-};
-const listPost = {
-	id: "",
+	user: {
+		id: "",
+		name: "",
+		avatar: "",
+	},
 	photos: [],
 	create_at: "",
-	body: "",
+	caption: "",
 	tag: "",
 	comments: [],
-	emoji: [],
+	likers: [],
 	state: { locked: false },
 };
-module.exports = { postSchema, listPost, };
+module.exports = postSchema;
