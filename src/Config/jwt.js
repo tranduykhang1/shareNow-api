@@ -38,13 +38,19 @@ module.exports = {
 						return next();
 					}
 				});
-			}
-			else{
+			} else {
 				return next();
 			}
+		} else if (!token || !req.headers) {
+			return res.status(403).json("Token no provider!");
 		}
-		else if (!token || !req.headers){
-			return res.status(403).json("Token no provider!")
-		}
+	},
+	getDataToken(token) {
+		let data; 
+		jwt.verify(token, jwtSecret, (err, result) => {
+			if (err) return err;
+			data = result.data 
+		});
+		return data
 	},
 };

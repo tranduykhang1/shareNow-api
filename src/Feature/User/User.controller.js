@@ -66,6 +66,7 @@ class User {
 			return res.status(200).json(result);
 		});
 	}
+	
 }
 
 module.exports = new User();

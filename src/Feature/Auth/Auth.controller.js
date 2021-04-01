@@ -30,6 +30,7 @@ class Auth {
             userSchema.email = req.user.email;
             userSchema.password = req.user.password;
             userSchema.fullname = req.user.full_name;
+            userSchema.type = "user"
             authModel.modifyUserModel(userSchema, (err, result) => {
                 if (err) res.json(err);
                 else {

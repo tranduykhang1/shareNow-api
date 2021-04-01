@@ -1,9 +1,24 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const cookieSession = require("cookie-session");
-const upload = require("express-fileUpload");
-const app = express();
+const app = require("express")(),
+	bodyParser = require("body-parser"),
+	cookieSession = require("cookie-session"),
+	upload = require("express-fileUpload"),
+	cors = require("cors"),
+	PORT = process.ENV || 1234;
 
+//socket configuration
+const http = require("http").createServer(app),
+	io = require("socket.io")(http, {
+		cors: {
+			origin: '*'
+		},
+		 allowEIO3: true 
+	});
+
+socketServer = require("./src/socketIO/io");
+socketServer(io);
+
+//
+app.use(cors())
 app.use(
 	upload({
 		useTempFiles: true,
@@ -20,14 +35,16 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-const Auth = require("./src/Feature/Auth/Auth.route.js");
-const User = require("./src/Feature/User/User.route.js");
-const Group = require("./src/Feature/Group/Group.route.js");
-const Post = require("./src/Feature/Post/Post.route.js");
-const Message = require("./src/Feature/Message/Message.route.js");
-const MessageRoom = require("./src/Feature/MessageRoom/MessageRoom.route.js");
-const Interact = require("./src/Feature/Interact/Interact.route.js");
-const Admin = require("./src/Feature/Admin/Admin.route.js");
+//
+const Auth = require("./src/Feature/Auth/Auth.route.js"),
+	User = require("./src/Feature/User/User.route.js"),
+	Group = require("./src/Feature/Group/Group.route.js"),
+	Post = require("./src/Feature/Post/Post.route.js"),
+	Message = require("./src/Feature/Message/Message.route.js"),
+	MessageRoom = require("./src/Feature/MessageRoom/MessageRoom.route.js"),
+	Interact = require("./src/Feature/Interact/Interact.route.js"),
+	Admin = require("./src/Feature/Admin/Admin.route.js"),
+	Report = require("./src/Feature/Report/Report.route.js");
 
 app.use("/auth", Auth);
 app.use("/user", User);
@@ -36,6 +53,9 @@ app.use("/post", Post);
 app.use("/message", Message);
 app.use("/room", MessageRoom);
 app.use("/interact", Interact);
+app.use("/report", Report);
 app.use("/admin", Admin);
 
-app.listen(process.env.PORT || 1234);
+
+
+http.listen(PORT);

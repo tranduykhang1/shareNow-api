@@ -3,12 +3,11 @@ const bcrypt = require("bcrypt");
 const { handleMailer } = require("../../Handler/handleMailer.js");
 const conn = require("../../Connection/ConnectDB.js");
 const { signJwt } = require("../../Config/jwt.js");
-
 class authModel {
     loginModel(userModel, cb) {
         conn.then((db) => {
             const userDB = db.collection("user");
-            userDB.findOne({ email: userModel.email }, async (err, res) => {
+            userDB.findOne({ email: userModel.email }, async(err, res) => {
                 if (!res) {
                     return cb(null, "Email not Found");
                 } else {
@@ -64,12 +63,10 @@ class authModel {
     }
     updatePasswordModel(userModel, cb) {
         console.log(userModel);
-        conn.then(async (db) => {
+        conn.then(async(db) => {
             const userDB = db.collection("user");
             const hashPassword = await bcrypt.hash(userModel.newPassword, 10);
-            userDB.updateOne(
-                { email: userModel.email },
-                { $set: { password: hashPassword } },
+            userDB.updateOne({ email: userModel.email }, { $set: { password: hashPassword } },
                 (err, result) => {
                     if (err) return cb(err);
                     else {

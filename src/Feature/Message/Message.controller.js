@@ -5,8 +5,7 @@ const messageModel = require("./Message.model");
 
 class Message {
 	createConversation(req, res) {
-		messageSchema.to = req.body.to;
-		messageSchema.from = req.body.from;
+		messageSchema.users = [req.body.to, req.body.from]
 		messageModel.createConversationModel(messageSchema, (err, result) => {
 			if (err) return res.status(403).json(err);
 			return res.status(200).json(result);
@@ -17,7 +16,7 @@ class Message {
 		const { conversation_id } = req.body;
 		const data = {
 			message_id: uuid(),
-			message_body: "Hello",
+			message_body: req.body.message,
 			send_by: req.user._id,
 			send_at: Date(),
 		};

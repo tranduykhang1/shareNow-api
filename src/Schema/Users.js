@@ -14,7 +14,8 @@ const userSchema = {
 	end_year: "",
 	followers: [], 
 	following: [],
-	state: { online: false, active: false, locked: false } 
+	state: { online: false, active: false, locked: false }, 
+	type: ""
 }
 
 module.exports = userSchema

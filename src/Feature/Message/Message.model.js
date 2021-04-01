@@ -47,7 +47,7 @@ class messageModel {
 		console.log(data);
 		conn.then((db) => {
 			const messageDB = db.collection("message");
-			messageDB.findOne({ from: data.from, to: data.to }, (err, result) => {
+			messageDB.findOne({ $and: [{users: data.from}, {users: data.to}] }, (err, result) => {
 				if (err) return cb(err);
 				return cb(null, result);
 			});

@@ -1,6 +1,5 @@
 const messageSchema = {
-	from: "",
-	to: "",
+	users: [],
 	body: [
 		/*
 		{

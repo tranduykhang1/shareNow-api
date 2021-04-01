@@ -1,0 +1,11 @@
+const constants = {
+	UPLOAD_POST: "UPLOAD_POST",
+	POST_COMMENT: "POST_COMMENT",
+	JOIN_ROOM: "JOIN_ROOM",
+	LEAVE_ROOM: "LEAVE_ROOM",
+	TYPING: "TYPING",
+	NEW_USER: "NEW_USER",
+	SEND_MESSAGE: 'SEND_MESSAGE',
+};
+
+module.exports = constants;

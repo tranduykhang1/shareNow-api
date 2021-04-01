@@ -7,7 +7,7 @@ class userModel {
 	getProfileModel(userId, cb) {
 		conn.then((db) => {
 			const userDB = db.collection("user");
-			userDB.findOne({ _id: ObjectId(userId) }, (err, result) => {
+			userDB.findOne({ _id: ObjectID(userId) }, (err, result) => {
 				if (err) return cb(new Error(err));
 				else return cb(null, result);
 			});
@@ -140,11 +140,32 @@ class userModel {
 					},
 				])
 				.toArray()
-				.then((result) => cb(null,result))
+				.then((result) => cb(null, result))
 				.catch((err) => cb(err));
 		});
 	}
-};
+	onlineStateModel(userId) {
+		conn.then((db) => {
+			const userDB = db.collection("user");
+			userDB.updateOne(
+				{
+					_id: ObjectID(userId),
+				},
+				{ $set: { "state.online": true } }
+			);
+		});
+	}
+	offlineStateModel(userId) {
+		conn.then((db) => {
+			const userDB = db.collection("user");
+			userDB.updateOne(
+				{
+					_id: ObjectID(userId),
+				},
+				{ $set: { "state.online": false } }
+			);
+		});
+	}
+}
 
-
-module.exports = new userModel()
+module.exports = new userModel();
