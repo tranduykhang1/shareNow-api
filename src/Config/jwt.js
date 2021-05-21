@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { jwtSecret } = require("../Env/jwtSecret.js");
+const config = require("../Env/jwtSecret.js");
 
 module.exports = {
 	signJwt(user) {
@@ -7,16 +7,30 @@ module.exports = {
 			{
 				data: user,
 			},
-			jwtSecret,
-			{ expiresIn: "1h" }
+			config.jwtSecret,
+			{ expiresIn: "1m" }
 		);
-		return token;
+		const refreshToken = jwt.sign({ data: user }, config.refreshToken, {
+			expiresIn: "7d",
+		});
+		return {
+			token: token,
+			refreshToken: refreshToken,
+		};
+	},
+	verifyRefreshToken(refreshToken, cb) {
+		return new Promise((resolve, reject) => {
+			jwt.verify(refreshToken, config.refreshToken, (err, decode) => {
+				if (err) return reject(err);
+				resolve(decode.data)
+			});
+		});
 	},
 	verifyJwt(req, res, next) {
 		const { token } = req.query;
 		if (token) {
-			jwt.verify(token, jwtSecret, (err, result) => {
-				if (err) return res.status(403).json("Verify fail! Token invalid");
+			jwt.verify(token, config.jwtSecret, (err, result) => {
+				if (err) return res.status(401).json("Verify fail! Token invalid");
 				else {
 					req.user = result.data;
 					return next();
@@ -30,9 +44,9 @@ module.exports = {
 		) {
 			const token = req.headers.authorization.split(" ")[1];
 			if (token) {
-				jwt.verify(token, jwtSecret, (err, result) => {
+				jwt.verify(token, config.jwtSecret, (err, result) => {
 					if (err)
-						return res.status(403).json("Verify fail! Token invalid");
+						return res.status(401).json("Verify fail! Token invalid");
 					else {
 						req.user = result.data;
 						return next();
@@ -42,15 +56,15 @@ module.exports = {
 				return next();
 			}
 		} else if (!token || !req.headers) {
-			return res.status(403).json("Token no provider!");
+			return res.status(401).json("Token no provider!");
 		}
 	},
 	getDataToken(token) {
-		let data; 
+		let data;
 		jwt.verify(token, jwtSecret, (err, result) => {
 			if (err) return err;
-			data = result.data 
+			data = result.data;
 		});
-		return data
+		return data;
 	},
 };

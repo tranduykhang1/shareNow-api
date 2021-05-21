@@ -5,30 +5,36 @@ const postModel = require("./post.model");
 
 class Post {
 	async createPost(req, res) {
+		console.log(req.body);
 		const urls = [],
 			userId = req.user._id;
 
-		if (req.files.photos.length >= 2) {
-			for (const file of req.files.photos) {
-				const { tempFilePath } = file;
+		if (req.files) {
+			if (req.files.photos.length >= 2) {
+				for (const file of req.files.photos) {
+					const { tempFilePath } = file;
+					const newUrl = await cloudinaryUpload(
+						tempFilePath,
+						"/post-photos"
+					);
+					urls.push(newUrl.url);
+				}
+			} else {
+				const { tempFilePath } = req.files.photos;
 				const newUrl = await cloudinaryUpload(tempFilePath, "/post-photos");
 				urls.push(newUrl.url);
 			}
-		} else {
-			const { tempFilePath } = req.files.photos;
-			const newUrl = await cloudinaryUpload(tempFilePath, "/post-photos");
-			urls.push(newUrl.url);
 		}
-
 		//check
-		
-		postSchema.user.id = req.user._id
-		postSchema.user.name = req.user.fullname
-		postSchema.user.avatar = req.user.avatar
+
+		postSchema.user.id = req.user._id;
+		postSchema.user.name = req.user.fullname;
+		postSchema.user.avatar = req.user.avatar;
 		postSchema.caption = req.body.caption;
 		postSchema.photos = urls;
 		postSchema.create_at = Date();
-		postSchema.tag = req.body.tag;
+		postSchema.topics = req.body.topic;
+		postSchema.tags = req.body.tag;
 
 		postModel.createPostModel(postSchema, (err, result) => {
 			if (err) return res.status(403).json(err);
@@ -53,10 +59,32 @@ class Post {
 			return res.status(200).json(result);
 		});
 	}
+	getAllOfPosts(req, res) {
+		const { page } = req.params;
+		let limit = page * 7;
+		postModel.allOfPostsModel(limit, (err, result) => {
+			if (err) return res.status(403).json(err);
+			return res.status(200).json(result);
+		});
+	}
 	getUsersPost(req, res) {
 		const { id } = req.query;
 		postModel.postOfUser(id, (err, result) => {
 			if (err) return res.status(403).json(err);
+			return res.status(200).json(result);
+		});
+	}
+	getPostByTopic(req, res) {
+		const { topic } = req.query;
+		postModel.getPostByTopicModel(topic, (err, result) => {
+			if (err) return res.status(403).json(err);
+			return res.status(200).json(result);
+		});
+	}
+	getPostByTag(req, res) {
+		const { tag, topic } = req.query;
+		postModel.getPostByTagModel(topic, tag, (err, result) => {
+			if (err) return res.json(err);
 			return res.status(200).json(result);
 		});
 	}

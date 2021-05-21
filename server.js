@@ -1,10 +1,9 @@
 const app = require("express")(),
 	bodyParser = require("body-parser"),
 	cookieSession = require("cookie-session"),
-	upload = require("express-fileUpload"),
+	upload = require("express-fileupload"),
 	cors = require("cors"),
 	PORT = process.ENV || 1234;
-
 //socket configuration
 const http = require("http").createServer(app),
 	io = require("socket.io")(http, {
@@ -45,6 +44,9 @@ const Auth = require("./src/Feature/Auth/Auth.route.js"),
 	Interact = require("./src/Feature/Interact/Interact.route.js"),
 	Admin = require("./src/Feature/Admin/Admin.route.js"),
 	Report = require("./src/Feature/Report/Report.route.js");
+	Notification = require("./src/Feature/Notification/Notification.route.js");
+	Curriculum = require("./src/Feature/TheCurriculum/Curriculum.route.js");
+
 
 app.use("/auth", Auth);
 app.use("/user", User);
@@ -55,6 +57,8 @@ app.use("/room", MessageRoom);
 app.use("/interact", Interact);
 app.use("/report", Report);
 app.use("/admin", Admin);
+app.use("/notification", Notification);
+app.use("/curriculum", Curriculum);
 
 
 

@@ -4,18 +4,21 @@ const userSchema = {
 	password: "",
 	fullname: "",
 	username: "",
+	birthday: "",
+	from: "",
 	avatar: "",
 	background: "",
 	student_code: "",
 	industry: "",
 	department: "",
-	class: "",
-	start_year: "",
-	end_year: "",
+	class_room: "",
+	course: "",
 	followers: [], 
 	following: [],
 	state: { online: false, active: false, locked: false }, 
-	type: ""
+	type: "",
+	bio: "",
+	create_at: ""
 }
 
 module.exports = userSchema

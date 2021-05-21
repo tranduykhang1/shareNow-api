@@ -2,9 +2,16 @@ const conn = require("../../Connection/ConnectDB");
 const { ObjectID } = require("mongodb");
 
 class reportModel {
-	reportModel(_id, schema, data, cb) {
+
+	constructor() {
 		conn.then((db) => {
 			const reportDB = db.collection("report");
+			this.reportDB = reportDB;
+		});
+	}
+
+	reportModel(_id, schema, data, cb) {
+		conn.then((db) => {
 			reportDB.findOne(
 				{ "body.id": _id, "body.type": schema.body.type },
 				(err, account) => {
@@ -36,7 +43,6 @@ class reportModel {
 	}
 	reportedAccountsModel(cb) {
 		conn.then((db) => {
-			const reportDB = db.collection("report");
 			reportDB
 				.aggregate([
 					{ $match: { "body.type": "account" } },
@@ -65,7 +71,6 @@ class reportModel {
 	}
 	reportedPostsModel(cb) {
 		conn.then((db) => {
-			const reportDB = db.collection("report");
 			reportDB
 				.aggregate([
 					{ $match: { "body.type": "post" } },

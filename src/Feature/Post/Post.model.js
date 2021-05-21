@@ -2,48 +2,45 @@ const conn = require("../../Connection/ConnectDB");
 const { ObjectID } = require("mongodb");
 
 class postModel {
-	createPostModel(data, cb) {
+	constructor() {
 		conn.then((db) => {
 			const postDB = db.collection("post");
-			postDB.insertOne(
-				data,
-				{ forceServerObjectId: true },
-				(err, result) => {
-					if (err) {
-						return cb(err);
-					}
-					return cb(null, "Upload success!");
-				}
-			);
+			this.postDB = postDB;
 		});
+	}
+	createPostModel(data, cb) {
+		this.postDB.insertOne(
+			data,
+			{ forceServerObjectId: true },
+			(err, result) => {
+				if (err) {
+					return cb(err);
+				}
+				return cb(null, "Upload success!");
+			}
+		);
 	}
 	updatePostModel(data, cb) {
-		conn.then((db) => {
-			const postDB = db.collection("post");
-			postDB.updateOne(
-				{ _id: ObjectID(data.id) },
-				{
-					$set: {
-						caption: data.caption,
-						tag: data.tag,
-					},
+		this.postDB.updateOne(
+			{ _id: ObjectID(data.id) },
+			{
+				$set: {
+					caption: data.caption,
+					tag: data.tag,
 				},
-				(err, result) => {
-					if (err) {
-						return cb("Update fail!");
-					}
-					return cb(null, "Update success!");
+			},
+			(err, result) => {
+				if (err) {
+					return cb("Update fail!");
 				}
-			);
-		});
+				return cb(null, "Update success!");
+			}
+		);
 	}
 	deletePostModel(postId, cb) {
-		conn.then((db) => {
-			const postDB = db.collection("post");
-			postDB.deleteOne({ _id: ObjectID(postId) }, (err, result) => {
-				if (err) return cb(err);
-				return cb(null, "Post was deleted!");
-			});
+		this.postDB.deleteOne({ _id: ObjectID(postId) }, (err, result) => {
+			if (err) return cb(err);
+			return cb(null, "Post was deleted!");
 		});
 	}
 	/*userIsExist(userId, cb) {
@@ -69,15 +66,33 @@ class postModel {
 		});
 	}
 	*/
+	allOfPostsModel(limit, cb) {
+		this.postDB
+			.aggregate([{ $limit: limit }])
+			.toArray()
+			.then((result) => cb(null, result))
+			.catch((err) => cb(err));
+	}
 	postOfUser(userId, cb) {
-		conn.then((db) => {
-			const postDB = db.collection("post");
-			postDB
-				.aggregate([{ $match: { "user.id": userId } }])
-				.toArray()
-				.then((result) => cb(null, result))
-				.catch((err) => cb(err));
-		});
+		this.postDB
+			.aggregate([{ $match: { "user.id": userId } }])
+			.toArray()
+			.then((result) => cb(null, result))
+			.catch((err) => cb(err));
+	}
+	getPostByTopicModel(topic, cb) {
+		this.postDB
+			.aggregate([{ $match: { topic: topic } }])
+			.toArray()
+			.then((result) => cb(null, result))
+			.catch((err) => cb(err));
+	}
+	getPostByTagModel(topic, tag, cb) {
+		this.postDB
+			.aggregate([{ $match: { $and: [{ topics: topic }, { tags: tag }] } }])
+			.toArray()
+			.then((result) => cb(null, result))
+			.catch((err) => cb(err));
 	}
 }
 

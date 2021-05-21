@@ -4,18 +4,19 @@ const { ObjectID } = require("mongodb");
 
 
 class messageRoomModel {
-	createRoomModel(data, cb) {
+	constructor() {
 		conn.then((db) => {
 			const roomDB = db.collection("message_room");
+			this.roomDB = roomDB;
+		});
+	}
+	createRoomModel(data, cb) {
 			roomDB.insertOne(data, (err, result) => {
 				if (err) return cb(err);
 				return cb(null, "Room was created!");
 			});
-		});
 	}
 	newMessageRoomModel(room, data, cb) {
-		conn.then((db) => {
-			const roomDB = db.collection("message_room");
 			roomDB.updateOne(
 				{ _id: ObjectID(room) },
 				{ $push: { messages: data } },
@@ -24,11 +25,8 @@ class messageRoomModel {
 					return cb(null, "New message was inserted!");
 				}
 			);
-		});
 	}
 	deleteMsgRoomModel(room, cb) {
-		conn.then((db) => {
-			const roomDB = db.collection("message_room");
 			roomDB.updateOne(
 				{
 					"messages.id": room,
@@ -39,11 +37,8 @@ class messageRoomModel {
 					return cb(null, "Message was deleted!");
 				}
 			);
-		});
 	}
 	getRoomMembersModel(room, cb) {
-		conn.then((db) => {
-			const roomDB = db.collection("message_room");
 			roomDB
 				.aggregate([
 					{ $match: { _id: ObjectID(room) } },
@@ -67,11 +62,8 @@ class messageRoomModel {
 				])
 				.toArray()
 				.then((result) => cb(null, result));
-		});
 	}
 	joinRoomModel(data, cb) {
-		conn.then((db) => {
-			const roomDB = db.collection("message_room");
 			roomDB.findOne({ room_code: data.room }, (err, room) => {
 				if (err) return cb(err);
 				else {
@@ -100,11 +92,8 @@ class messageRoomModel {
 					}
 				}
 			});
-		});
 	}
 	leaveRoomModel(data, cb) {
-		conn.then((db) => {
-			const roomDB = db.collection("message_room");
 			roomDB.updateOne(
 				{ _id: ObjectID(data.room) },
 				{ $pull: { members: data.user } },
@@ -113,16 +102,12 @@ class messageRoomModel {
 					return cb(null, "Left!");
 				}
 			);
-		});
 	}
 	destroyRoomModel(room, cb) {
-		conn.then((db) => {
-			const roomDB = db.collection("message_room");
 			roomDB.deleteOne({_id: ObjectID(room)}, (err,result) =>{
 				if(err) return cb(err)
 				return cb(null, "Room was deleted!")
 			})
-		});
 	}
 }
 

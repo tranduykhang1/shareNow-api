@@ -2,23 +2,25 @@ const conn = require("../../Connection/ConnectDB");
 const { ObjectID } = require("mongodb");
 
 class interactiveModel {
-	createCommentModel(postId, data, cb) {
+	constructor() {
 		conn.then((db) => {
 			const postDB = db.collection("post");
-			postDB.updateOne(
+			this.postDB = postDB;
+		});
+	}
+	createCommentModel(postId, data, cb) {
+			this.postDB.updateOne(
 				{ _id: ObjectID(postId) },
 				{ $push: { comments: data } },
 				(err, result) => {
 					if (err) return cb(err);
+					//update notifications
 					return cb(null, "Comment success!");
 				}
 			);
-		});
 	}
 	deleteCommentModel(data, cb) {
-		conn.then((db) => {
-			const postDB = db.collection("post");
-			postDB.findOneAndUpdate(
+			this.postDB.findOneAndUpdate(
 				{ _id: ObjectID(data.postId) },
 				{ $pull: { comments: { id: data.commentId } } },
 				(err, result) => {
@@ -26,12 +28,9 @@ class interactiveModel {
 					return cb(null, "Comment was deleted!");
 				}
 			);
-		});
 	}
 	editCommentModel(data, cb) {
-		conn.then((db) => {
-			const postDB = db.collection("post");
-			postDB.updateOne(
+			this.postDB.updateOne(
 				{
 					"comments.id": data.commentId,
 				},
@@ -44,28 +43,23 @@ class interactiveModel {
 					return cb(null, "Comment was edited!");
 				}
 			);
-		});
 	}
 	likePostModel(postId, data, cb) {
-		conn.then((db) => {
-			const postDB = db.collection("post");
-			postDB.updateOne(
+			this.postDB.updateOne(
 				{
 					_id: ObjectID(postId),
 				},
 				{ $push: { likers: data } },
 				(err, result) => {
 					if (err) return cb(err);
+					//update notifications
 					return cb(null, "Like this post!");
 				}
 			);
-		});
 	}
 	unLikePostModel(data, cb) {
 		console.log(data);
-		conn.then((db) => {
-			const postDB = db.collection("post");
-			postDB.updateOne(
+			this.postDB.updateOne(
 				{
 					_id: ObjectID(data.postId),
 				},
@@ -75,7 +69,16 @@ class interactiveModel {
 					return cb(null, "unLike this post!");
 				}
 			);
-		});
+	}
+	getCommentsModel(limit, postId, cb) {
+		this.postDB
+			.aggregate([
+				{ $match: { _id: ObjectID(postId) } },
+				{ $project: { comments: { $slice: ["$comments", limit] } } },
+			])
+			.toArray()
+			.then((result) => cb(null, result))
+			.catch((err) => cb(err));
 	}
 }
 

@@ -1,7 +1,11 @@
 const nodemailer = require("nodemailer");
 const { signJwt } = require("../Config/jwt.js");
+const {confirmEmailTemplate} =require("./SendMailTemplate")
 
 exports.handleMailer = (user, isForgot, cb) => {
+    let mailToken = signJwt(user);
+    mailToken = mailToken.token;
+
     const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -13,20 +17,16 @@ exports.handleMailer = (user, isForgot, cb) => {
     if (!isForgot) {
         mailOptions = {
             from: "sep31700215@gmail.com",
-            subject: "Confirm your Email",
+            subject: "Xác nhận Email",
             to: user.email,
-            html: `<div><h3>Confirm your email to finish</h3>${signJwt(
-                user
-            )}</div>`,
+            html: confirmEmailTemplate(mailToken),
         };
     } else {
         mailOptions = {
             from: "sep31700215@gmail.com",
-            subject: "Reset Password",
+            subject: "Cập nhật mật khẩu mới.",
             to: user,
-            html: `<div><h3>Confirm your email to get new password</h3>${signJwt(
-                user
-            )}</div>`,
+            html: confirmEmailTemplate(mailToken),
         };
     }
 

@@ -8,6 +8,7 @@ router.delete('/comment', verifyJwt,  interactiveController.deleteComment)
 router.put('/comment', verifyJwt,  interactiveController.editComment)
 router.get('/like', verifyJwt,  interactiveController.likePost)
 router.delete('/like', verifyJwt,  interactiveController.unLikePost)
+router.get('/comment/:postId/:page', verifyJwt,  interactiveController.getComment)
 
 
 module.exports = router

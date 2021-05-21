@@ -6,6 +6,8 @@ const constants = {
 	TYPING: "TYPING",
 	NEW_USER: "NEW_USER",
 	SEND_MESSAGE: 'SEND_MESSAGE',
+	NOTIFICATION: 'NOTIFICATION',
+	//SEND_MESSAGE: 'SEND_MESSAGE',
 };
 
 module.exports = constants;

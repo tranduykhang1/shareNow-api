@@ -1,13 +1,20 @@
 const { v4: uuid } = require("uuid");
 const { getDataToken } = require("../Config/jwt");
 
+const realtimeDB = require('./RealtimeDB')
 const constants = require("./Constants"),
 	userModel = require("../Feature/User/User.model.js"),
 	messageModel = require("../Feature/Message/Message.model");
 
+
+
+
+
 module.exports = (io) => {
 	let users = [],
 		currentUser = {};
+	//const rDB = new realtimeDB(io);
+	//rDB.postStream()
 
 	io.on("connection", (socket) => {
 		socket.on(constants.UPLOAD_POST, (data) => {

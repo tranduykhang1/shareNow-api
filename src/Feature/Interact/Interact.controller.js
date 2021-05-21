@@ -62,6 +62,14 @@ class Interactive {
 			return res.status(200).json(result);
 		});
 	}
+	getComment(req, res) {
+		const { page, postId } = req.params;
+		let limit = page * 5
+		interactModel.getCommentsModel(limit, postId, (err,result) =>{
+			if(err) return res.status(403).json(err)
+			return res.status(200).json(result)
+		})
+	}
 }
 
 module.exports = new Interactive();

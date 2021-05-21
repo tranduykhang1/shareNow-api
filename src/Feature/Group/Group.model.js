@@ -3,10 +3,15 @@ const { ObjectID } = require("mongodb");
 const conn = require("../../Connection/ConnectDB");
 
 class groupModel {
-	createGroupModel(data, cb) {
+	
+	constructor() {
 		conn.then((db) => {
-			const groupDb = db.collection("group");
-			groupDb.insertOne(
+			const groupDB = db.collection("group");
+			this.groupDB = groupDB;
+		});
+	}
+	createGroupModel(data, cb) {
+			this.groupDB.insertOne(
 				data,
 				{ forceServerObjectId: true },
 				(err, result) => {
@@ -14,21 +19,15 @@ class groupModel {
 					return cb(null, "New group was created!");
 				}
 			);
-		});
 	}
 	deleteGroupModel(groupId, cb) {
-		conn.then((db) => {
-			const groupDb = db.collection("group");
-			groupDb.deleteOne({ _id: ObjectID(groupId) }, (err, result) => {
+			this.groupDB.deleteOne({ _id: ObjectID(groupId) }, (err, result) => {
 				if (err) return cb(new Error(err));
 				return cb(null, "Group was deleted!");
 			});
-		});
 	}
 	updateGroupModel(data, cb) {
-		conn.then((db) => {
-			const groupDb = db.collection("group");
-			groupDb.updateOne(
+			this.groupDB.updateOne(
 				{ _id: ObjectID(data.id) },
 				{ $set: { name: data.name, topic: data.topic } },
 				(err, result) => {
@@ -36,12 +35,9 @@ class groupModel {
 					return cb(null, "Group was updated!");
 				}
 			);
-		});
 	}
 	addMemberModel(data, cb) {
-		conn.then((db) => {
-			const groupDb = db.collection("group");
-			groupDb.updateOne(
+			this.groupDB.updateOne(
 				{ _id: ObjectID(data.id) },
 				{ $push: { members: data.user } },
 				(err, result) => {
@@ -49,12 +45,9 @@ class groupModel {
 					return cb(null, "User was added!");
 				}
 			);
-		});
 	}
 	removeMemberModel(data, cb) {
-		conn.then((db) => {
-			const groupDB = db.collection("group");
-			groupDB.updateOne(
+			this.groupDB.updateOne(
 				{ _id: ObjectID(data.id) },
 				{ $pull: { members: data.user } },
 				(err, result) => {
@@ -62,32 +55,25 @@ class groupModel {
 					return cb(null, "User was removed!");
 				}
 			);
-		});
 	}
+
+	//get post list of group by user
 	groupByUserModel(id, cb) {
-		conn.then((db) => {
-			const groupDB = db.collection("group");
-			groupDB
+			this.groupDB
 				.find({ members: id })
 				.toArray()
 				.then((result) => cb(null, result))
 				.catch((err) => cb(new Error(err)));
-		});
 	}
 	searchGroupModel(q, cb) {
-		conn.then((db) => {
-			const groupDB = db.collection("group");
-			groupDB
+			this.groupDB
 				.find({ search_name: { $regex: q } })
 				.toArray()
 				.then((result) => cb(null, result))
 				.catch((err) => cb(new Error(err)));
-		});
 	}
 	createNewPostModel(group, data, cb) {
-		conn.then((db) => {
-			const groupDB = db.collection("group");
-			groupDB.updateOne(
+			this.groupDB.updateOne(
 				{ _id: ObjectID(group) },
 				{ $push: { post: data } },
 				(err, result) => {
@@ -95,7 +81,6 @@ class groupModel {
 					return cb(null, "New post was created!");
 				}
 			);
-		});
 	}
 }
 
