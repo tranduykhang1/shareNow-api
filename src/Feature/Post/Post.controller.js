@@ -5,7 +5,6 @@ const postModel = require("./post.model");
 
 class Post {
 	async createPost(req, res) {
-		console.log(req.body);
 		const urls = [],
 			userId = req.user._id;
 
@@ -28,7 +27,7 @@ class Post {
 		//check
 
 		postSchema.user.id = req.user._id;
-		postSchema.user.name = req.user.fullname;
+		postSchema.user.name = req.user.full_name;
 		postSchema.user.avatar = req.user.avatar;
 		postSchema.caption = req.body.caption;
 		postSchema.photos = urls;
@@ -59,21 +58,26 @@ class Post {
 			return res.status(200).json(result);
 		});
 	}
-	getAllOfPosts(req, res) {
-		const { page } = req.params;
-		let limit = page * 7;
-		postModel.allOfPostsModel(limit, (err, result) => {
+
+
+	allOfPosts(req, res) {
+		let { page } = req.params;
+		let user_id = req.user._id;
+		let limit = page * 6;
+		postModel.allOfPostsModel(user_id, limit, (err, result) => {
 			if (err) return res.status(403).json(err);
 			return res.status(200).json(result);
 		});
 	}
+
 	getUsersPost(req, res) {
-		const { id } = req.query;
+		const { id } = req.params;
 		postModel.postOfUser(id, (err, result) => {
 			if (err) return res.status(403).json(err);
 			return res.status(200).json(result);
 		});
 	}
+	/*
 	getPostByTopic(req, res) {
 		const { topic } = req.query;
 		postModel.getPostByTopicModel(topic, (err, result) => {
@@ -81,9 +85,10 @@ class Post {
 			return res.status(200).json(result);
 		});
 	}
-	getPostByTag(req, res) {
+	*/
+	filterPost(req, res) {
 		const { tag, topic } = req.query;
-		postModel.getPostByTagModel(topic, tag, (err, result) => {
+		postModel.filterPostModel(topic, tag, (err, result) => {
 			if (err) return res.json(err);
 			return res.status(200).json(result);
 		});

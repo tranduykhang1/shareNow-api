@@ -29,9 +29,9 @@ class messageRoomModel {
 	deleteMsgRoomModel(room, cb) {
 			roomDB.updateOne(
 				{
-					"messages.id": room,
+					"messages.message_id": room,
 				},
-				{ $set: { "messages.$.isDeleted": true } },
+				{ $set: { "messages.$.is_deleted": true } },
 				(err, result) => {
 					if (err) return cb(err);
 					return cb(null, "Message was deleted!");

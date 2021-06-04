@@ -8,7 +8,7 @@ module.exports = {
 				data: user,
 			},
 			config.jwtSecret,
-			{ expiresIn: "1m" }
+			{ expiresIn: "5m" }
 		);
 		const refreshToken = jwt.sign({ data: user }, config.refreshToken, {
 			expiresIn: "7d",
@@ -61,7 +61,7 @@ module.exports = {
 	},
 	getDataToken(token) {
 		let data;
-		jwt.verify(token, jwtSecret, (err, result) => {
+		jwt.verify(token, config.jwtSecret, (err, result) => {
 			if (err) return err;
 			data = result.data;
 		});

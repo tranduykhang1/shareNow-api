@@ -1,11 +1,12 @@
 const conn = require("../../Connection/ConnectDB");
 const { ObjectID } = require("mongodb");
-
 class postModel {
 	constructor() {
 		conn.then((db) => {
 			const postDB = db.collection("post");
+			const groupDB = db.collection("group");
 			this.postDB = postDB;
+			this.groupDB = groupDB;
 		});
 	}
 	createPostModel(data, cb) {
@@ -66,33 +67,109 @@ class postModel {
 		});
 	}
 	*/
-	allOfPostsModel(limit, cb) {
+	allOfPostsModel(user_id, limit, cb) {
 		this.postDB
-			.aggregate([{ $limit: limit }])
+			.find({})
+			.limit(limit)
+			.sort({ $natural: -1 })
 			.toArray()
-			.then((result) => cb(null, result))
+			.then((post) => cb(null, post))
 			.catch((err) => cb(err));
+
+		/* this.postDB
+			.aggregate([{ $limit: limit }, { $sort: { create_at: 1 } }])
+			.toArray()
+			.then((post) => {
+				postList = post;
+				//
+				this.groupDB
+					.aggregate([
+						{ $match: { members: user_id } },
+						{ $unwind: "$post" },
+						{
+							$project: {
+								_id: 1,
+								name: 1,
+								post: 1,
+							},
+						},
+						{ $limit: limit },
+						{ $sort: { "post.create_at": 1 } },
+					])
+					.toArray()
+					.then(async (news) => {
+						news.map((post) => postList.push(post));
+						await postList.sort(
+							(a, b) => new Date(b.create_at) - new Date(a.create_at)
+						);
+						return cb(null, postList);
+					});
+			})
+			.catch((err) => cb(err));
+			*/
 	}
 	postOfUser(userId, cb) {
 		this.postDB
-			.aggregate([{ $match: { "user.id": userId } }])
+			.aggregate([
+				{ $match: { "user.id": userId } },
+				{ $addFields: { tag_id: { $toObjectId: "$tags" } } },
+				{ $addFields: { topic_id: { $toObjectId: "$topics" } } },
+				{
+					$lookup: {
+						from: "tag",
+						localField: "tag_id",
+						foreignField: "_id",
+						as: "tag",
+					},
+				},
+				{
+					$lookup: {
+						from: "department",
+						localField: "topic_id",
+						foreignField: "_id",
+						as: "topic",
+					},
+				},
+				{ $sort: { $natural: -1 } },
+			])
 			.toArray()
 			.then((result) => cb(null, result))
 			.catch((err) => cb(err));
 	}
-	getPostByTopicModel(topic, cb) {
+	/*
+	getPostByTopicModel(department, cb) {
 		this.postDB
-			.aggregate([{ $match: { topic: topic } }])
+			.aggregate([{ $match: { department: department } }])
 			.toArray()
 			.then((result) => cb(null, result))
 			.catch((err) => cb(err));
 	}
-	getPostByTagModel(topic, tag, cb) {
-		this.postDB
-			.aggregate([{ $match: { $and: [{ topics: topic }, { tags: tag }] } }])
-			.toArray()
-			.then((result) => cb(null, result))
-			.catch((err) => cb(err));
+	*/
+	filterPostModel(topic, tag, cb) {
+		if (!topic) {
+			this.postDB
+				.find({ tags: tag })
+				.sort({ $natural: -1 })
+				.toArray()
+				.then((result) => cb(null, result));
+		}
+		if (!tag) {
+			this.postDB
+				.find({ topics: topic })
+				.sort({ $natural: -1 })
+				.toArray()
+				.then((result) => cb(null, result));
+		}
+		if (tag && topic) {
+			this.postDB
+				.aggregate([
+					{ $match: { $and: [{ topics: topic }, { tags: tag }] } },
+					{ $sort: { create_at: -1 } },
+				])
+				.toArray()
+				.then((result) => cb(null, result))
+				.catch((err) => cb(err));
+		}
 	}
 }
 

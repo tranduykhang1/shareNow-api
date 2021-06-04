@@ -2,6 +2,8 @@ const { v4: uuid } = require("uuid");
 const randomize = require("randomatic");
 const messageRoomModel = require("./MessageRoom.Model");
 const { roomSchema, messageSchema } = require("../../Schema/MessageRoom");
+const { cloudinaryUpload } = require("../../Config/cloudinary.config");
+
 
 class messageRoom {
 	createRoom(req, res) {
@@ -18,14 +20,35 @@ class messageRoom {
 			return res.status(200).json(result);
 		});
 	}
-	newMessageRoom(req, res) {
+	async newMessageRoom(req, res) {
 		const { roomId } = req.body,
-			{ body } = req.body,
+			{ message_body } = req.body,
 			user = req.user._id;
-		messageSchema.id = uuid();
-		messageSchema.to = user;
-		messageSchema.body = body;
-		messageSchema.send_at = Date();
+		const urls = [];
+
+		if (req.files) {
+			if (req.files.photos.length >= 2) {
+				for (const file of req.files.photos) {
+					const { tempFilePath } = file;
+					const newUrl = await cloudinaryUpload(
+						tempFilePath,
+						"/message-photos"
+					);
+					urls.push(newUrl.url);
+				}
+			} else {
+				const { tempFilePath } = req.files.photos;
+				const newUrl = await cloudinaryUpload(tempFilePath, "/message-photos");
+				urls.push(newUrl.url);
+			}
+		}
+
+
+		messageSchema.message_id = uuid();
+		messageSchema.send_by = user;
+		messageSchema.messge_content = message_body;
+		messageSchema.photos = urls;
+		messageSchema.sent_at = Date();
 
 		messageRoomModel.newMessageRoomModel(
 			roomId,

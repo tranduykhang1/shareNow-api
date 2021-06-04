@@ -1,5 +1,7 @@
 const bcrypt = require("bcrypt");
 const { ObjectID } = require("mongodb");
+const messageModel = require("../Message/Message.model");
+const notificationModel = require("../Notification/Notification.model");
 
 const conn = require("../../Connection/ConnectDB.js");
 
@@ -10,7 +12,7 @@ class userModel {
 			this.userDB = userDB;
 		});
 	}
-	confirmUserModel(id,data, cb) {
+	confirmUserModel(userId, data, cb) {
 		let {
 			department,
 			industry,
@@ -29,27 +31,52 @@ class userModel {
 					industry: industry,
 					class_room: class_room,
 					course: course,
-					"state.active": true
+					"state.active": true,
 				},
 			},
 			(err, result) => {
 				if (err) return cb(new Error(err));
-				return cb(null, "User is active")
+				return cb(null, "User is active");
 			}
 		);
 	}
 	getProfileModel(userId, cb) {
-		this.userDB.findOne({ _id: ObjectID(userId) }, (err, result) => {
-			if (err) return cb(new Error(err));
-			return cb(null, result);
-		});
+		this.userDB
+			.aggregate([
+				{ $match: { _id: ObjectID(userId) } },
+				{ $addFields: { departmentId: { $toObjectId: "$department" } } },
+				{ $addFields: { industryId: { $toObjectId: "$industry" } } },
+				{
+					$lookup: {
+						from: "department",
+						localField: "departmentId",
+						foreignField: "_id",
+						as: "department",
+					},
+				},
+				{
+					$lookup: {
+						from: "industry",
+						localField: "industryId",
+						foreignField: "_id",
+						as: "industry",
+					},
+				},
+			])
+			.toArray()
+			.then((result) => cb(null, result[0]))
+			.catch((err) => {
+				this.userDB
+					.findOne({ _id: ObjectID(userId) })
+					.then((result) => cb(null, result));
+			});
 	}
 	updateProfileModel(userSchema, email, cb) {
 		this.userDB.updateOne(
 			{ email: email },
 			{
 				$set: {
-					fullname: userSchema.full_name,
+					full_name: userSchema.full_name,
 					username: userSchema.username,
 					from: userSchema.from,
 					birthday: userSchema.birthday,
@@ -60,7 +87,7 @@ class userModel {
 					industry: userSchema.industry,
 					course: userSchema.course,
 					class_room: userSchema.class_room.toUpperCase(),
-					bio: userSchema.bio
+					bio: userSchema.bio,
 				},
 			},
 			(err, result) => {
@@ -106,7 +133,21 @@ class userModel {
 										{ $pull: { followers: data.thisUser } },
 										(err, result) => {
 											if (result) {
-												return cb(null, "unFollow this user!");
+												messageModel.deleteConversationModel(
+													{
+														thisUser: data.thisUser,
+														otherUser: data.otherUser,
+													},
+													(err, result) => {
+														if (err) {
+															return cb(err);
+														}
+														return cb(
+															null,
+															"unFollowing this user!"
+														);
+													}
+												);
 											}
 										}
 									);
@@ -124,7 +165,31 @@ class userModel {
 										{ $push: { followers: data.thisUser } },
 										(err, result) => {
 											if (result) {
-												return cb(null, "Following this user!");
+												messageModel.createConversationModel(
+													{
+														user: [data.thisUser, data.otherUser],
+														message_list: [],
+													},
+													(err, result) => {
+														if (result) {
+															notificationModel.pushNotice(
+																data.thisUser,
+																data.otherUser,
+																data.thisUser,
+																"đã theo dõi bạn",
+																"follow",
+																(err, result) => {
+																	if (err) return cb(err);
+																	//socket handler
+																	return cb(
+																		null,
+																		"Following this user!"
+																	);
+																}
+															);
+														}
+													}
+												);
 											}
 										}
 									);
@@ -155,7 +220,33 @@ class userModel {
 					$project: {
 						"users._id": 1,
 						"users.avatar": 1,
-						"users.fullname": 1,
+						"users.full_name": 1,
+					},
+				},
+			])
+			.toArray()
+			.then((result) => cb(null, result))
+			.catch((err) => cb(err));
+	}
+	listFollowerModel(userId, cb) {
+		this.userDB
+			.aggregate([
+				{ $match: { _id: ObjectID(userId) } },
+				{ $unwind: "$following" },
+				{ $addFields: { userId: { $toObjectId: "$followers" } } },
+				{
+					$lookup: {
+						from: "user",
+						localField: "userId",
+						foreignField: "_id",
+						as: "users",
+					},
+				},
+				{
+					$project: {
+						"users._id": 1,
+						"users.avatar": 1,
+						"users.full_name": 1,
 					},
 				},
 			])
@@ -178,6 +269,37 @@ class userModel {
 			},
 			{ $set: { "state.online": false } }
 		);
+	}
+
+	getTotalUserModel(cb) {
+		let response = {
+			total: 0,
+			online: 0,
+		};
+		this.userDB
+			.aggregate([
+				{ $match: { "state.online": true } },
+				{
+					$count: "online",
+				},
+			])
+			.toArray()
+			.then((result) => {
+				if (result[0]) {
+					response.online = result[0].online;
+				}
+				this.userDB
+					.aggregate([
+						{
+							$count: "total",
+						},
+					])
+					.toArray()
+					.then((result) => {
+						response.total = result[0].total;
+						return cb(null, response);
+					});
+			});
 	}
 }
 

@@ -1,6 +1,7 @@
 const userModel = require("./User.model.js");
 const { cloudinaryUpload } = require("../../Config/cloudinary.config");
 
+
 class User {
 	confirmUser(req, res) {
 		let { _id } = req.user;
@@ -20,7 +21,7 @@ class User {
 			userId = req.user._id;
 		}
 		userModel.getProfileModel(userId, (err, result) => {
-			if (err) return res.json("User not found or error");
+			if (err) return res.status(500).json(err);
 			return res.status(200).json(result);
 		});
 	}
@@ -33,7 +34,6 @@ class User {
 		});
 	}
 	async updateAvatar(req, res) {
-		console.log(req.files)
 		const { tempFilePath } = req.files.photo;
 		const upload = await cloudinaryUpload(tempFilePath, "/avatar");
 		const data = {
@@ -76,6 +76,16 @@ class User {
 			return res.status(200).json(result);
 		});
 	}
+
+
+	getTotleUser(req,res){
+		userModel.getTotalUserModel((err,result) =>{
+			if(err) return res.status(500).json(err)
+			return res.json(result)
+		})
+
+	
+}
 }
 
 module.exports = new User();

@@ -1,12 +1,14 @@
 const messageSchema = {
 	users: [],
-	body: [
+	message_list: [
 		/*
 		{
-		send_by: "",
 			message_id: "",
+			sent_by: "",
 			message_content: "",
-			send_at: "",
+			photos: [],
+			sent_at: "",
+			is_deleted: false
 		},
 		*/
 	],

@@ -10,10 +10,12 @@ const roomSchema = {
 };
 
 const messageSchema = {
-	id: "",
-	to: "",
-	body: "",
-	send_at: ""
+	message_id: "",
+	sent_by: "",
+	message_content: "",
+	photos: [],
+	sent_at: "",
+	is_delete: false
 };
 
 module.exports = { roomSchema, messageSchema };

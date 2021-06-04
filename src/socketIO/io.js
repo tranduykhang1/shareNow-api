@@ -1,14 +1,10 @@
 const { v4: uuid } = require("uuid");
 const { getDataToken } = require("../Config/jwt");
 
-const realtimeDB = require('./RealtimeDB')
+const realtimeDB = require("./RealtimeDB");
 const constants = require("./Constants"),
 	userModel = require("../Feature/User/User.model.js"),
 	messageModel = require("../Feature/Message/Message.model");
-
-
-
-
 
 module.exports = (io) => {
 	let users = [],
@@ -17,10 +13,6 @@ module.exports = (io) => {
 	//rDB.postStream()
 
 	io.on("connection", (socket) => {
-		socket.on(constants.UPLOAD_POST, (data) => {
-			console.log(data);
-			socket.emit(constants.UPLOAD_POST, data);
-		});
 		socket.on(constants.POST_COMMENT, (data) => {
 			console.log(data);
 			socket.emit(constants.UPLOAD_POST, data);
@@ -34,22 +26,24 @@ module.exports = (io) => {
 			socket.emit(constants.LEAVE_ROOM, result);
 		});
 		socket.on(constants.TYPING, (data) => {
-			let socketId = users[data.id]
+			let socketId = users[data.id];
 			//socket.to(socketId).emit(constants.TYPING, "");
-			io.emit(constants.TYPING, "")
+			io.emit(constants.TYPING, "");
 		});
+
 		//change state user (online or offline)
 		socket.on(constants.NEW_USER, (token) => {
 			currentUser = getDataToken(token);
-
-			users[currentUser._id] = socket.id;
-			userModel.onlineStateModel(currentUser._id);
-			socket.on("disconnect", () => {
-				userModel.offlineStateModel(currentUser._id);
-			});
+			if (currentUser) {
+				users[currentUser._id] = socket.id;
+				userModel.onlineStateModel(currentUser._id);
+				socket.on("disconnect", () => {
+					userModel.offlineStateModel(currentUser._id);
+				});
+			}
 		});
 		socket.on(constants.SEND_MESSAGE, (data) => {
-			let socketId = users(data.id)
+			let socketId = users(data.id);
 			const msgData = {
 				message_id: uuid(),
 				message_body: data.message_body,
@@ -59,7 +53,7 @@ module.exports = (io) => {
 			messageModel.newMessageModel(msgData, data.id, (err, result) => {
 				if (result) {
 					socket.to(socketId).emit(constants.SEND_MESSAGE, msgData);
-					socketId.emit(constants.SEND_MESSAGE, msgData)
+					socketId.emit(constants.SEND_MESSAGE, msgData);
 				}
 			});
 		});

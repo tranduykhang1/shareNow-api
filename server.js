@@ -46,6 +46,9 @@ const Auth = require("./src/Feature/Auth/Auth.route.js"),
 	Report = require("./src/Feature/Report/Report.route.js");
 	Notification = require("./src/Feature/Notification/Notification.route.js");
 	Curriculum = require("./src/Feature/TheCurriculum/Curriculum.route.js");
+	Notification = require("./src/Feature/Notification/Notification.route.js");
+	Search = require("./src/Feature/Search/Search.route.js");
+
 
 
 app.use("/auth", Auth);
@@ -59,6 +62,9 @@ app.use("/report", Report);
 app.use("/admin", Admin);
 app.use("/notification", Notification);
 app.use("/curriculum", Curriculum);
+app.use("/notification", Notification);
+app.use("/search", Search);
+
 
 
 

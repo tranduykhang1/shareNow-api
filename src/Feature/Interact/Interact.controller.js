@@ -24,7 +24,7 @@ class Interactive {
 			commentId: req.query.comment_id,
 		};
 		interactModel.deleteCommentModel(data, (err, result) => {
-			if (err) return res.status(403).json(err);
+			if (err) return res.status(500).json(err);
 			return res.status(200).json(result);
 		});
 	}
@@ -35,7 +35,7 @@ class Interactive {
 			content: req.body.content,
 		};
 		interactModel.editCommentModel(data, (err, result) => {
-			if (err) return res.status(403).json(err);
+			if (err) return res.status(500).json(err);
 			return res.status(200).json(result);
 		});
 	}
@@ -48,7 +48,7 @@ class Interactive {
 			avatar: req.user.avatar,
 		};
 		interactModel.likePostModel(post, data, (err, result) => {
-			if (err) return res.status(403).json(err);
+			if (err) return res.status(500).json(err);
 			return res.status(200).json(result);
 		});
 	}
@@ -58,7 +58,7 @@ class Interactive {
 			likeId: req.query.like_id,
 		};
 		interactModel.unLikePostModel(data, (err, result) => {
-			if (err) return res.status(403).json(err);
+			if (err) return res.status(500).json(err);
 			return res.status(200).json(result);
 		});
 	}
@@ -66,7 +66,7 @@ class Interactive {
 		const { page, postId } = req.params;
 		let limit = page * 5
 		interactModel.getCommentsModel(limit, postId, (err,result) =>{
-			if(err) return res.status(403).json(err)
+			if(err) return res.status(500).json(err)
 			return res.status(200).json(result)
 		})
 	}

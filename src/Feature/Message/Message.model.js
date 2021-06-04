@@ -10,19 +10,28 @@ class messageModel {
 		});
 	}
 	createConversationModel(data, cb) {
-			messageDB.insertOne(
+			this.messageDB.insertOne(
 				data,
 				{ forceServerObjectId: true },
 				(err, result) => {
 					if (err) return cb(err);
-					return cb(null, "Message was created!");
+					return cb(null, "Conversation created!");
+				}
+			);
+	}
+	deleteConversationModel(data, cb) {
+			this.messageDB.deleteMany(
+				{$and: [{user: data.thisUser}, {user: data.otherUser}]},
+				(err, result) => {
+					if (err) return cb(err);
+					return cb(null, "Conversation deleted!");
 				}
 			);
 	}
 	newMessageModel(data, id, cb) {
-			messageDB.updateOne(
+			this.messageDB.updateOne(
 				{ _id: ObjectID(id) },
-				{ $push: { body: data } },
+				{ $push: { message_list: data } },
 				(err, result) => {
 					if (err) return cb(err);
 					return cb(null, "Message saved!");
@@ -30,18 +39,18 @@ class messageModel {
 			);
 	}
 	deleteMessageModel(data, cb) {
-			messageDB.updateOne(
+			this.messageDB.updateOne(
 				{
-					"body.message_id": data.msg_id,
+					"message_list.message_id": data.msg_id,
 				},
-				{ $set: { "body.$.isDeleted": true } },
+				{ $set: { "message_list.$.is_deleted": true } },
 				(err, result) => {
 					if (result) return cb(null, "Message was deleted!");
 				}
 			);
 	}
 	getMessageModel(data, cb) {
-			messageDB.findOne({ $and: [{users: data.from}, {users: data.to}] }, (err, result) => {
+			this.messageDB.findOne({ $and: [{users: data.from}, {users: data.to}] }, (err, result) => {
 				if (err) return cb(err);
 				return cb(null, result);
 			});

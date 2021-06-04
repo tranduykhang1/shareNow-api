@@ -3,6 +3,7 @@ const salt = 10;
 const authModel = require("./Auth.model.js");
 const userSchema = require("../../Schema/Users.js");
 const { handleMailer } = require("../../Handler/handleMailer.js");
+const {regexStr} = require("../../Config/regex.config")
 
 let globalEmail = "";
 class Auth {
@@ -21,8 +22,10 @@ class Auth {
     }
     googleLogin(req, res) {
         let user = req.body.data.profileObj;
+        let searchName = regexStr(user.name).toLowerCase() 
         userSchema.email = user.email;
-        userSchema.fullname = user.name;
+        userSchema.method = "google";
+        userSchema.full_name = searchName;
         userSchema.avatar = user.imageUrl;
 
         authModel.googleLoginModel(userSchema, (err, result) => {
@@ -44,9 +47,14 @@ class Auth {
     }
     confirmEmail(req, res) {
         if (req.user.password) {
+            console.log(req.user)
+            let searchName = regexStr(req.user.full_name).toLowerCase();
             userSchema.email = req.user.email;
             userSchema.password = req.user.password;
-            userSchema.fullname = req.user.full_name;
+            userSchema.method = "local";
+            userSchema.full_name = req.user.full_name;
+            userSchema.search_name = searchName; 
+            userSchema.username = req.user.username; 
             userSchema.type = "user";
             userSchema.create_at = new Date();
             authModel.modifyUserModel(userSchema, (err, result) => {
