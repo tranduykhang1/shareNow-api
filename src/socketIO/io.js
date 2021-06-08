@@ -3,59 +3,64 @@ const { getDataToken } = require("../Config/jwt");
 
 const realtimeDB = require("./RealtimeDB");
 const constants = require("./Constants"),
-	userModel = require("../Feature/User/User.model.js"),
-	messageModel = require("../Feature/Message/Message.model");
+    userModel = require("../Feature/User/User.model.js"),
+    messageModel = require("../Feature/Message/Message.model");
 
 module.exports = (io) => {
-	let users = [],
-		currentUser = {};
-	//const rDB = new realtimeDB(io);
-	//rDB.postStream()
+    let users = [],
+        currentUser = {};
+    //const rDB = new realtimeDB(io);
+    //rDB.postStream()
 
-	io.on("connection", (socket) => {
-		socket.on(constants.POST_COMMENT, (data) => {
-			console.log(data);
-			socket.emit(constants.UPLOAD_POST, data);
-		});
-		socket.on(constants.JOIN_ROOM, async (token) => {
-			const result = await getDataToken(token);
-			socket.emit(constants.JOIN_ROOM, result);
-		});
-		socket.on(constants.LEAVE_ROOM, async (token) => {
-			const result = await getDataToken(token);
-			socket.emit(constants.LEAVE_ROOM, result);
-		});
-		socket.on(constants.TYPING, (data) => {
-			let socketId = users[data.id];
-			//socket.to(socketId).emit(constants.TYPING, "");
-			io.emit(constants.TYPING, "");
-		});
+    io.on("connection", (socket) => {
+        socket.on(constants.POST_COMMENT, (data) => {
+            console.log(data);
+            socket.emit(constants.UPLOAD_POST, data);
+        });
+        socket.on(constants.JOIN_ROOM, async(token) => {
+            const result = await getDataToken(token);
+            socket.emit(constants.JOIN_ROOM, result);
+        });
+        socket.on(constants.LEAVE_ROOM, async(token) => {
+            const result = await getDataToken(token);
+            socket.emit(constants.LEAVE_ROOM, result);
+        });
 
-		//change state user (online or offline)
-		socket.on(constants.NEW_USER, (token) => {
-			currentUser = getDataToken(token);
-			if (currentUser) {
-				users[currentUser._id] = socket.id;
-				userModel.onlineStateModel(currentUser._id);
-				socket.on("disconnect", () => {
-					userModel.offlineStateModel(currentUser._id);
-				});
-			}
-		});
-		socket.on(constants.SEND_MESSAGE, (data) => {
-			let socketId = users(data.id);
-			const msgData = {
-				message_id: uuid(),
-				message_body: data.message_body,
-				send_by: currentUser._id,
-				send_at: Date(),
-			};
-			messageModel.newMessageModel(msgData, data.id, (err, result) => {
-				if (result) {
-					socket.to(socketId).emit(constants.SEND_MESSAGE, msgData);
-					socketId.emit(constants.SEND_MESSAGE, msgData);
-				}
-			});
-		});
-	});
+
+
+        //change state user (online or offline)
+        socket.on(constants.NEW_USER, async(token) => {
+            currentUser = await getDataToken(token);
+            if (currentUser) {
+                users[currentUser._id] = socket.id;
+                console.log(socket.id)
+                userModel.onlineStateModel(currentUser._id);
+                socket.on("disconnect", () => {
+                    userModel.offlineStateModel(currentUser._id);
+                });
+            }
+        });
+        socket.on(constants.TYPING, (data) => {
+            let state = false
+            let socketId = users[data];
+            console.log(users)
+            io.to(socketId).emit(constants.TYPING, { Hello: "OKe" });
+            // io.emit(constants.TYPING, true)
+        });
+
+        socket.on(constants.SEND_MESSAGE, (data) => {
+            let state = false
+            let socketId = users[data];
+
+            socket.to(users[data]).emit(constants.SEND_MESSAGE, !state);
+
+
+            // messageModel.newMessageModel(msgData, data.id, (err, result) => {
+            //     if (result) {
+            //         socket.to(socketId).emit(constants.SEND_MESSAGE, msgData);
+            //         socketId.emit(constants.SEND_MESSAGE, msgData);
+            //     }
+            // });
+        });
+    });
 };

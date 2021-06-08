@@ -8,7 +8,7 @@ class Interactive {
 		const postId = req.body.post_id;
 		commentSchema.id = uuid();
 		commentSchema.comment_by.id = req.user._id;
-		commentSchema.comment_by.name = req.user.fullname;
+		commentSchema.comment_by.name = req.user.full_name;
 		commentSchema.comment_by.avatar = req.user.avatar;
 		commentSchema.content = req.body.content;
 		commentSchema.create_at = Date();
@@ -63,12 +63,11 @@ class Interactive {
 		});
 	}
 	getComment(req, res) {
-		const { page, postId } = req.params;
-		let limit = page * 5
-		interactModel.getCommentsModel(limit, postId, (err,result) =>{
-			if(err) return res.status(500).json(err)
-			return res.status(200).json(result)
-		})
+		const { postId } = req.params;
+		interactModel.getCommentsModel(postId, (err, result) => {
+			if (err) return res.status(500).json(err);
+			return res.status(200).json(result);
+		});
 	}
 }
 

@@ -18,28 +18,24 @@ class authModel {
         });
     }
     loginModel(userModel, cb) {
-        this.userDB.findOne({ email: userModel.email }, async (err, res) => {
+        this.userDB.findOne({ email: userModel.email }, async(err, res) => {
             if (!res) {
                 return cb(null, "Email not Found");
             } else {
                 bcrypt.compare(
                     userModel.password,
                     res.password,
-                    async (err, isMatch) => {
+                    async(err, isMatch) => {
                         if (!isMatch) {
                             return cb(null, "Password incorrect");
                         } else {
                             if (!res.state.locked) {
                                 const jwtToken = await signJwt(res);
-                                this.jwtDB.updateOne(
-                                    { _id: ObjectID(this._id) },
-                                    {
-                                        $push: {
-                                            refresh_token:
-                                                jwtToken.refreshToken,
-                                        },
-                                    }
-                                );
+                                this.jwtDB.updateOne({ _id: ObjectID(this._id) }, {
+                                    $push: {
+                                        refresh_token: jwtToken.refreshToken,
+                                    },
+                                });
                                 return cb(jwtToken);
                             }
                             return cb(null, "Account was locked!");
@@ -53,14 +49,12 @@ class authModel {
         this.jwtDB
             .aggregate([{ $match: { refresh_token: token } }])
             .toArray()
-            .then(async (isToken) => {
+            .then(async(isToken) => {
                 if (isToken.length > 0) {
                     try {
                         let decode = await verifyRefreshToken(token);
-                        let accessToken = jwt.sign(
-                            { data: decode },
-                            config.jwtSecret,
-                            {
+                        let accessToken = jwt.sign({ data: decode },
+                            config.jwtSecret, {
                                 expiresIn: "1h",
                             }
                         );
@@ -76,16 +70,16 @@ class authModel {
     }
     googleLoginModel(data, cb) {
         this.userDB.findOne({ email: data.email }).then((user) => {
-            if (user.length) {
+            if (user) {
                 console.log('create')
                 let jwtToken = signJwt(user);
-                return cb(null,jwtToken);
+                return cb(null, jwtToken);
             } else {
                 this.userDB
                     .insertOne(data)
                     .then((res) => {
                         let jwtToken = signJwt(user);
-                        return cb(null,jwtToken);
+                        return cb(null, jwtToken);
                     })
                     .catch((err) => cb(err));
             }
@@ -124,11 +118,9 @@ class authModel {
         });
     }
     updatePasswordModel(userModel, cb) {
-        conn.then(async (db) => {
+        conn.then(async(db) => {
             const hashPassword = await bcrypt.hash(userModel.newPassword, 10);
-            this.userDB.updateOne(
-                { email: userModel.email },
-                { $set: { password: hashPassword } },
+            this.userDB.updateOne({ email: userModel.email }, { $set: { password: hashPassword } },
                 (err, result) => {
                     if (err) return cb(err);
                     else {

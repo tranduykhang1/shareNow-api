@@ -96,12 +96,10 @@ class interactiveModel {
 			}
 		);
 	}
-	getCommentsModel(limit, postId, cb) {
+	getCommentsModel(postId, cb) {
 		this.postDB
-			.aggregate([
-				{ $match: { _id: ObjectID(postId) } },
-				{ $project: { comments: { $slice: ["$comments", limit] } } },
-			])
+			.aggregate([{ $match: { _id: ObjectID(postId) } },
+				{$project: {comments: 1}}])
 			.toArray()
 			.then((result) => cb(null, result))
 			.catch((err) => cb(err));
