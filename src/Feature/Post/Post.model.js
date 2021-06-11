@@ -67,6 +67,8 @@ class postModel {
     allOfPostsModel(user_id, limit, cb) {
         this.postDB
             .aggregate([
+                { $sort: { _id: -1 } },
+                { $limit: limit },
                 { $addFields: { tag_id: { $toObjectId: "$tags" } } },
                 { $addFields: { topic_id: { $toObjectId: "$topic" } } },
                 {
@@ -86,13 +88,14 @@ class postModel {
                     },
                 },
             ])
-            .limit(limit)
             .toArray()
             .then((post) => {
-                post.sort((a, b) => new Date(b.create_at) - new Date(a.create_at))
                 return cb(null, post)
             })
-            .catch((err) => cb(err));
+            .catch((err) => {
+                console.log(err)
+                return cb(err)
+            });
 
         /* this.postDB
         	.aggregate([{ $limit: limit }, { $sort: { create_at: 1 } }])
@@ -164,10 +167,12 @@ class postModel {
         }
         */
     filterPostModel(topic, tag, cb) {
-        if (!topic) {
+        console.log(topic, tag)
+        if (topic === "false" || tag === "false") {
             this.postDB
-                .aggregate([
-                    { $match: { tag: tag } },
+                .aggregate([{
+                        $match: { $or: [{ tags: tag }, { topic: topic }] }
+                    },
                     { $addFields: { tag_id: { $toObjectId: "$tags" } } },
                     { $addFields: { topic_id: { $toObjectId: "$topic" } } },
                     {
@@ -194,37 +199,7 @@ class postModel {
                 })
                 .catch((err) => cb(err));
         }
-        if (!tag) {
-            this.postDB
-                .aggregate([
-                    { $match: { topic: topic } },
-                    { $addFields: { tag_id: { $toObjectId: "$tags" } } },
-                    { $addFields: { topic_id: { $toObjectId: "$topic" } } },
-                    {
-                        $lookup: {
-                            from: "tag",
-                            localField: "tag_id",
-                            foreignField: "_id",
-                            as: "tag",
-                        },
-                    },
-                    {
-                        $lookup: {
-                            from: "department",
-                            localField: "topic_id",
-                            foreignField: "_id",
-                            as: "topic",
-                        },
-                    },
-                ])
-                .toArray()
-                .then((post) => {
-                    post.sort((a, b) => new Date(b.create_at) - new Date(a.create_at))
-                    return cb(null, post)
-                })
-                .catch((err) => cb(err));
-        }
-        if (tag && topic) {
+        if (tag !== "false" && topic !== "false") {
             this.postDB
                 .aggregate([
                     { $match: { $and: [{ topic: topic }, { tags: tag }] } },
@@ -254,6 +229,14 @@ class postModel {
                 })
                 .catch((err) => cb(err));
         }
+
+    }
+
+    getPhotosByUserModel(userId, cb) {
+        this.postDB.aggregate([
+            { $match: { 'user.id': userId } },
+            { $unwind: "$photo" }
+        ]).toArray().then(result => cb(null, result))
     }
 }
 

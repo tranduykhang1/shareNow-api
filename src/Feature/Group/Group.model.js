@@ -135,6 +135,7 @@ class groupModel {
                             "user.full_name": 1,
                             "user.avatar": 1,
                             "user.from": 1,
+                            "user.class_name": 1
                         },
                     },
                 ])
@@ -159,12 +160,13 @@ class groupModel {
             .catch((err) => cb(new Error(err)));
     }
     searchGroupModel(q, cb) {
-        this.groupDB
-            .find({ search_name: { $regex: q } })
-            .toArray()
-            .then((result) => cb(null, result))
-            .catch((err) => cb(new Error(err)));
-    }
+            this.groupDB
+                .find({ search_name: { $regex: q } })
+                .toArray()
+                .then((result) => cb(null, result))
+                .catch((err) => cb(new Error(err)));
+        }
+        //post
     createNewPostModel(group, data, cb) {
         this.groupDB.updateOne({ _id: ObjectID(group) }, { $push: { post: data } },
             (err, result) => {
@@ -173,6 +175,17 @@ class groupModel {
             }
         );
     }
+    removePostModel(data, cb) {
+        this.groupDB.updateOne({ _id: ObjectID(data.groupId) }, { $pull: { 'post._id': data.postId } },
+            (err, result) => {
+                if (err) return cb(err);
+                return cb(null, "Post was deleted!");
+            }
+        );
+    }
+
+
+    //
     newsInGroupModel(groupId, cb) {
         let resp = [];
         this.groupDB

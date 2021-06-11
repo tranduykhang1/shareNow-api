@@ -69,6 +69,15 @@ class Interactive {
 			return res.status(200).json(result);
 		});
 	}
+	commentPostInGroup(req,res){
+
+	}
+	likePostInGroup(req,res){
+
+	}
+	unLikePostInGroup(req,res){
+
+	}
 }
 
 module.exports = new Interactive();

@@ -117,7 +117,9 @@ class messageModel {
         let messageList
         this.messageDB.aggregate([
             { $match: { $or: [{ "user.from": userId }, { "user.to": userId }] } },
-            { $addFields: { userFrom: { $toObjectId: "$user.from" } } },
+            {
+                $sort: { "message.sent_at": 1 }
+            }, { $addFields: { userFrom: { $toObjectId: "$user.from" } } },
             { $addFields: { userTo: { $toObjectId: "$user.to" } } },
 
             {
@@ -148,9 +150,7 @@ class messageModel {
                     message: { $arrayElemAt: ["$message_list", -1] }
                 }
             },
-            {
-                $sort: { "message.sent_at": 1 }
-            }
+
         ]).toArray().then(async messages => {
 
             messages.map(message => {
@@ -177,7 +177,6 @@ class messageModel {
                 messageList = messages
 
                 rooms.map(room => messageList.push(room))
-                console.log(messageList)
                 messageList.sort((a, b) => {
                     let sent_at_a = 0,
                         sent_at_b = 0

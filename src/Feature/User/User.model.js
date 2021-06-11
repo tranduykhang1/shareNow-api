@@ -9,7 +9,9 @@ class userModel {
     constructor() {
         conn.then((db) => {
             const userDB = db.collection("user");
+            const postDB = db.collection('post')
             this.userDB = userDB;
+            this.postDB = postDB
         });
     }
     confirmUserModel(userId, data, cb) {

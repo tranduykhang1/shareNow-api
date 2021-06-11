@@ -93,6 +93,14 @@ class Post {
             return res.status(200).json(result);
         });
     }
+
+    getPhotoByUser(req, res) {
+        const userId = req.user._id;
+        postModel.getPhotosByUserModel(userId, (err, result) => {
+            if (err) return res.json(err);
+            return res.status(200).json(result);
+        });
+    }
 }
 
 module.exports = new Post();

@@ -61,7 +61,8 @@ class messageRoomModel {
                         userId: 1,
                         "users.avatar": 1,
                         "users.full_name": 1,
-                        "users._id": 1
+                        "users._id": 1,
+                        "users.class_room": 1
                     },
                 },
             ])
@@ -108,6 +109,18 @@ class messageRoomModel {
             if (err) return cb(err)
             return cb(null, "Room was deleted!")
         })
+    }
+    getRoomsByUser(userId, cb) {
+        this.roomDB.aggregate([
+            { $match: { members: userId } },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    members: 1
+                }
+            }
+        ]).toArray().then(result => cb(null, result))
     }
 }
 
