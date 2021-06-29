@@ -9,12 +9,19 @@ router.put("/comment", verifyJwt, interactiveController.editComment);
 router.get("/like", verifyJwt, interactiveController.likePost);
 router.delete("/like", verifyJwt, interactiveController.unLikePost);
 router.get("/comment/:postId", verifyJwt, interactiveController.getComment);
+
 router.post(
     "/comment-group",
     verifyJwt,
     interactiveController.commentPostInGroup
 );
-router.post("/like-group", verifyJwt, interactiveController.likePostInGroup);
+router.get(
+    "/comment-group/:post_id",
+    verifyJwt,
+    interactiveController.getCommentInGroup
+);
+
+router.get("/like-group/:post_id", verifyJwt, interactiveController.likePostInGroup);
 router.delete(
     "/like-group",
     verifyJwt,

@@ -6,7 +6,11 @@ class interactiveModel {
     constructor() {
         conn.then((db) => {
             const postDB = db.collection("post");
+            const groupDB = db.collection("group");
+
             this.postDB = postDB;
+            this.groupDB = groupDB;
+
         });
     }
     createCommentModel(postId, data, cb) {
@@ -98,24 +102,34 @@ class interactiveModel {
 
 
     // comment post in group, like post in group
-    commentPostInGroupModel(data, cb) {
-        this.groupDB.updateOne({ "post.id": data.postId }, { $push: { "post.$.comments": data.comment } }, (err, result) => {
-            if (err) return cb(err)
-            return cb(null, "Comment is posted!")
-        })
+    commentPostInGroupModel(postId, data, cb) {
+        this.groupDB.updateOne({ "post._id": postId }, { $push: { 'post.$.comments': data } }).then(result => cb(null, "Comment was posted"))
     }
-    likePostInGroupModel(data, cb) {
-        this.groupDB.updateOne({ "post.id": data.postId }, { $push: { "post.$.likers": data.liker } }, (err, result) => {
+
+    getCommentInGroupModel(postId, cb) {
+        this.groupDB.aggregate([
+            { $unwind: '$post' },
+            { $match: { "post._id": postId } },
+            {
+                $project: {
+                    "post.comments": 1
+                }
+            }
+        ]).toArray().then(result => cb(null, result[0]))
+    }
+
+    likePostInGroupModel(postId, data, cb) {
+        this.groupDB.updateOne({ "post._id": postId }, { $push: { "post.$.likers": data } }, (err, result) => {
             if (err) return cb(err)
             return cb(null, "Like post!")
         })
     }
     unLikePostInGroupModel(data, cb) {
         this.groupDB.updateOne({ "post.likers.id": data.likeId }, {
-            $pull: { "post.likers.$.id": data.likeId }
+            $pull: { 'post.likers.$.id': data.likeId }
         }, (err, result) => {
-            if (err) return cb(err)
-            return cb(null, "Like post!")
+            if (err) console.log(err)
+            return cb(null, "unLike post!")
         })
     }
 }

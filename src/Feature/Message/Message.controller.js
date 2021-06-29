@@ -45,6 +45,7 @@ class Message {
                 avatar: req.user.avatar
             },
             sent_at: Date(),
+            is_deleted: false
         };
         messageModel.newMessageModel(data, conversation_id, (err, result) => {
             if (err) return res.status(403).json(err);

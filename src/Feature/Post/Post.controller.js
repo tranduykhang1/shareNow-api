@@ -45,6 +45,7 @@ class Post {
             id: req.body.post_id,
             caption: req.body.caption,
             tag: req.body.tag,
+            topic: req.body.topic
         };
         postModel.updatePostModel(data, (err, result) => {
             if (err) return res.status(403).json(err);

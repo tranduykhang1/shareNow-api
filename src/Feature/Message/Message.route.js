@@ -7,6 +7,7 @@ router.post("/new", verifyJwt, messageController.newMessage)
 router.delete("/delete", verifyJwt, messageController.deleteMessage)
 router.get("/", verifyJwt, messageController.getMessage)
 router.get("/message-list", verifyJwt, messageController.getMessageList)
+router.delete("/delete-message", verifyJwt, messageController.deleteMessage)
 
 
 

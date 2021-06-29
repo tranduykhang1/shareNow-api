@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 const { signJwt } = require("../Config/jwt.js");
-const {confirmEmailTemplate} =require("./SendMailTemplate")
+const { confirmEmailTemplate } = require("./SendMailTemplate")
 
 exports.handleMailer = (user, isForgot, cb) => {
     let mailToken = signJwt(user);

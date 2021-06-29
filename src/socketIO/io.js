@@ -65,11 +65,23 @@ module.exports = (io) => {
         });
 
         socket.on(constants.ROOM_MESSAGE, (data) => {
-            // io.emit(constants.ROOM_MESSAGE)
-            io.sockets.in('room-' + data).emit(constants.ROOM_MESSAGE)
+            if (data) {
+                let messageData = {
+                    msg_id: "",
+                    sent_by: {
+                        id: data.id,
+                        avatar: data.avatar,
+                        full_name: data.full_name
+                    },
+                    message_body: data.message,
+                    photos: data.photos,
+                    sent_at: new Date(),
+                    is_delete: false
+                }
+                io.sockets.in('room-' + data.roomId).emit(constants.ROOM_MESSAGE, messageData);
+            }
         })
         socket.on(constants.SEND_MESSAGE, (data) => {
-            console.log('oke')
             let socketId = users[data];
             socket.to(socketId).emit(constants.SEND_MESSAGE)
         });

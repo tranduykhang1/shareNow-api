@@ -24,7 +24,8 @@ class postModel {
         this.postDB.updateOne({ _id: ObjectID(data.id) }, {
                 $set: {
                     caption: data.caption,
-                    tag: data.tag,
+                    tags: data.tag,
+                    topic: data.topic
                 },
             },
             (err, result) => {

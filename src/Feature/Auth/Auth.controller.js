@@ -48,7 +48,6 @@ class Auth {
     }
     confirmEmail(req, res) {
         if (req.user.password) {
-            console.log(req.user)
             let searchName = regexStr(req.user.full_name).toLowerCase();
             userSchema.email = req.user.email;
             userSchema.password = req.user.password;
@@ -56,7 +55,6 @@ class Auth {
             userSchema.full_name = req.user.full_name;
             userSchema.search_name = searchName;
             userSchema.username = req.user.username;
-            userSchema.type = "user";
             userSchema.create_at = new Date();
             authModel.modifyUserModel(userSchema, (err, result) => {
                 if (err) res.json(err);
